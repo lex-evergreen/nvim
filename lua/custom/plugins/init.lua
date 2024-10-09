@@ -3,7 +3,9 @@
 --
 -- See the kickstart.nvim README for more information
 return {
+  -- A nice way to interact with git.
   'tpope/vim-fugitive',
+  -- Grab links from remote git repositories.
   {
     'linrongbin16/gitlinker.nvim',
     cmd = 'GitLink',
@@ -12,6 +14,10 @@ return {
       { '<leader>gy', '<cmd>GitLink<cr>', mode = { 'n', 'v' }, desc = 'Yank git link' },
       { '<leader>gY', '<cmd>GitLink!<cr>', mode = { 'n', 'v' }, desc = 'Open git link' },
     },
+  },
+  -- An HTTP client.
+  {
+    'rest-nvim/rest.nvim',
   },
   -- roslyn LSP plugin. A replacement for Omnisharp until it's available in Mason via the following PR:
   -- https://github.com/mason-org/mason-registry/pull/6330
