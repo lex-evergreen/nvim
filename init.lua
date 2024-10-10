@@ -168,19 +168,21 @@ vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 vim.keymap.set('n', '<leader>dq', vim.diagnostic.setloclist, { desc = 'Open [D]iagnostic [Q]uickfix list' })
 vim.keymap.set('n', '<leader>df', vim.diagnostic.open_float, { desc = 'Open [D]iagnostic [F]loat' })
 
--- Buffer keymaps
+--- Buffer keymaps
 -- Wipe the current buffer
 vim.keymap.set('n', '<leader>bw', function() vim.cmd('bw') end, { desc = '[b]uffer [w]ipe' })
--- Force wipe the current buffer
-vim.keymap.set('n', '<leader>bW', function() vim.cmd('bw!') end, { desc = '[b]uffer Force [W]ipe' })
 -- Edit the current buffer
 vim.keymap.set('n', '<leader>be', function() vim.cmd('e') end, { desc = '[b]uffer [e]dit' })
--- Force edit the current buffer
-vim.keymap.set('n', '<leader>bE', function() vim.cmd('e!') end, { desc = '[b]uffer Force [E]dit' })
--- Wipe all buffers
-vim.keymap.set('n', '<leader>Bw', function() vim.cmd('bufdo bw') end, { desc = 'All [B]uffers [w]ipe' })
--- Edit all buffers
-vim.keymap.set('n', '<leader>Be', function() vim.cmd('bufdo e') end, { desc = 'All [B]uffers [e]dit' })
+
+-- Extend buffer-related commands with "a"-suffix equivalents (like :w and :wa).
+vim.api.nvim_create_user_command('Ea', 'bufdo e', {})
+vim.api.nvim_create_user_command('Bwa', 'bufdo bw', {})
+-- Map capital equivalents of common commands to prevent no-ops or unintended completion
+-- when accidentally capitalizing.
+vim.api.nvim_create_user_command('Q', 'q', {})
+vim.api.nvim_create_user_command('W', 'w', {})
+vim.api.nvim_create_user_command('Qa', 'qa', {})
+vim.api.nvim_create_user_command('Wa', 'wa', {})
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
@@ -337,7 +339,6 @@ require('lazy').setup({
         { '<leader>t', group = '[T]oggle' },
         { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
         { '<leader>b', group = 'Current [b]uffer', },
-        { '<leader>b', group = 'All [B]uffers', },
       },
     },
   },
