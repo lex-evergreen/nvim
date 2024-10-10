@@ -19,6 +19,10 @@ return {
   {
     'rest-nvim/rest.nvim',
   },
+  {
+    'numToStr/Comment.nvim',
+    opts = {},
+  },
   -- roslyn LSP plugin. A replacement for Omnisharp until it's available in Mason via the following PR:
   -- https://github.com/mason-org/mason-registry/pull/6330
   -- This has problems with goto and is kinda slow while editing compared to Omnisharp.
