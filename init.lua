@@ -653,6 +653,7 @@ require('lazy').setup({
         -- This was recently renamed from tsserver to ts_ls in Mason.
         ts_ls = {},
         ['eslint-lsp'] = {},
+        ['json-lsp'] = {},
         --
         --[[ omnisharp = {
           settings = {
