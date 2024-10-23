@@ -170,9 +170,13 @@ vim.keymap.set('n', '<leader>df', vim.diagnostic.open_float, { desc = 'Open [D]i
 
 --- Buffer keymaps
 -- Wipe the current buffer
-vim.keymap.set('n', '<leader>bw', function() vim.cmd('bw') end, { desc = '[b]uffer [w]ipe' })
+vim.keymap.set('n', '<leader>bw', function()
+  vim.cmd 'bw'
+end, { desc = '[b]uffer [w]ipe' })
 -- Edit the current buffer
-vim.keymap.set('n', '<leader>be', function() vim.cmd('e') end, { desc = '[b]uffer [e]dit' })
+vim.keymap.set('n', '<leader>be', function()
+  vim.cmd 'e'
+end, { desc = '[b]uffer [e]dit' })
 
 -- Extend buffer-related commands with "a"-suffix equivalents (like :w and :wa).
 vim.api.nvim_create_user_command('Ea', 'bufdo e', {})
@@ -362,7 +366,7 @@ require('lazy').setup({
         { '<leader>w', group = '[W]orkspace' },
         { '<leader>t', group = '[T]oggle' },
         { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
-        { '<leader>b', group = 'Current [b]uffer', },
+        { '<leader>b', group = 'Current [b]uffer' },
       },
     },
   },
