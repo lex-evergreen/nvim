@@ -23,12 +23,15 @@ return {
     'numToStr/Comment.nvim',
     opts = {},
   },
-  -- roslyn LSP plugin. A replacement for Omnisharp until it's available in Mason via the following PR:
+  -- roslyn LSP plugin. A replacement for Omnisharp when it's available in Mason via the following PR:
   -- https://github.com/mason-org/mason-registry/pull/6330
-  -- This has problems with goto and is kinda slow while editing compared to Omnisharp.
-  -- Going to stick with that probably until it makes its way into mason and gets more attention.
-  --[[ {
+  -- This no longer seems to have problems with goto. It does sometimes have weird lag with error messages
+  -- while editing, though.
+  -- Until it's available in Mason, I'm trying it out with the syndim/mason-registry according to this comment
+  -- https://github.com/seblj/roslyn.nvim/issues/11#issuecomment-2294820871
+  {
     'seblj/roslyn.nvim',
+    -- Find values here: https://github.com/seblj/roslyn.nvim?tab=readme-ov-file#%EF%B8%8F-configuration
     config = {
       -- Here you can pass in any options that that you would like to pass to `vim.lsp.start`
       -- The only options that I explicitly override are, which means won't have any effect of setting here are:
@@ -53,10 +56,10 @@ return {
         },
       },
     },
-    exe = {
+    --[[ exe = {
       'dotnet',
       vim.fs.joinpath(vim.fn.stdpath 'data' .. 'roslyn' .. 'Microsoft.CodeAnalysis.LanguageServer.dll'),
-    },
+    }, ]]
     -- NOTE: Set `filewatching` to false if you experience performance problems.
     -- Defaults to true, since turning it off is a hack.
     -- If you notice that the server is _super_ slow, it is probably because of file watching
@@ -68,5 +71,5 @@ return {
     -- However, in `hacks.lua` I will also just don't start off any watchers, which seems to make the server
     -- a lot faster to initialize.
     filewatching = true,
-  }, ]]
+  },
 }

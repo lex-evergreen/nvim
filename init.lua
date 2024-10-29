@@ -711,7 +711,12 @@ require('lazy').setup({
       --    :Mason
       --
       --  You can press `g?` for help in this menu.
-      require('mason').setup()
+      require('mason').setup {
+        registries = {
+          'github:mason-org/mason-registry',
+          'github:syndim/mason-registry',
+        },
+      }
 
       -- You can add other tools here that you want Mason to install
       -- for you, so that they are available from within Neovim.
@@ -737,6 +742,9 @@ require('lazy').setup({
     end,
   },
 
+  -- There's currently a problem with neovim 0.10 that causes a "subcapture nesting too deep" error
+  -- when formatting files that have very long strings (I've only seen this in ts so far).
+  -- The resolution was meant to be backported to 0.10 but it failed. PR: https://github.com/neovim/neovim/pull/29520
   { -- Autoformat
     'stevearc/conform.nvim',
     event = { 'BufWritePre' },
