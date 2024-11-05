@@ -758,6 +758,14 @@ require('lazy').setup({
         mode = '',
         desc = '[F]ormat buffer',
       },
+      {
+        '<leader>csf',
+        function()
+          require('conform').format { async = true, lsp_format = 'fallback', formatters = { 'csharpier' } }
+        end,
+        mode = '',
+        desc = '[C][S]harpier [F]ormat buffer',
+      },
     },
     opts = {
       notify_on_error = false,
@@ -781,7 +789,7 @@ require('lazy').setup({
       -- end,
       formatters_by_ft = {
         lua = { 'stylua' },
-        cs = { 'csharpier' },
+        cs = { lsp_format = 'prefer' },
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
         --
