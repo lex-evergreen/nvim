@@ -297,6 +297,10 @@ require('lazy').setup({
             gitsigns.nav_hunk 'prev'
           end
         end)
+
+        map('n', '<leader>gb', function()
+          gitsigns.toggle_current_line_blame()
+        end)
       end,
     },
   },
@@ -365,7 +369,7 @@ require('lazy').setup({
         { '<leader>s', group = '[S]earch' },
         { '<leader>w', group = '[W]orkspace' },
         { '<leader>t', group = '[T]oggle' },
-        { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
+        { '<leader>g', group = '[G]it', mode = { 'n', 'v' } },
         { '<leader>b', group = 'Current [b]uffer' },
       },
     },
