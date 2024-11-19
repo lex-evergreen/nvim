@@ -426,6 +426,15 @@ require('lazy').setup({
       -- Telescope picker. This is really useful to discover what Telescope can
       -- do as well as how to actually do it!
 
+      -- This searches upward for a directory that contains a directory named
+      -- ".git" and then sets the current working directory to that directory.
+      -- If no upward directory contains a directory named ".git", it will
+      -- instead return the directory that neovim was opened at.
+      -- The purpose of this is to exclude gitignored files from grep searches.
+      local function find_git_root()
+        return vim.fn.fnamemodify(vim.fn.finddir('.git', '.;'), ':h')
+      end
+
       -- [[ Configure Telescope ]]
       -- See `:help telescope` and `:help telescope.setup()`
       require('telescope').setup {
@@ -438,7 +447,17 @@ require('lazy').setup({
           --    i = { ['<c-enter>'] = 'to_fuzzy_refine' },
           --  },
         },
-        -- pickers = {}
+        pickers = {
+          live_grep = {
+            cwd = find_git_root(),
+          },
+          grep_string = {
+            cwd = find_git_root(),
+          },
+          find_files = {
+            cwd = find_git_root(),
+          },
+        },
         extensions = {
           ['ui-select'] = {
             require('telescope.themes').get_dropdown(),
