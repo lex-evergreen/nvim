@@ -177,6 +177,14 @@ end, { desc = '[b]uffer [w]ipe' })
 vim.keymap.set('n', '<leader>be', function()
   vim.cmd 'e'
 end, { desc = '[b]uffer [e]dit' })
+-- Yank buffer filename
+vim.keymap.set('n', '<leader>byf', function()
+  vim.fn.setreg('+', vim.fn.expand '%:t')
+end, { desc = '[b]uffer [y]ank [f]ilename' })
+-- Yank buffer path
+vim.keymap.set('n', '<leader>byp', function()
+  vim.fn.setreg('+', vim.fn.expand '%:p')
+end, { desc = '[b]uffer [y]ank [p]ath' })
 
 -- Extend buffer-related commands with "a"-suffix equivalents (like :w and :wa).
 vim.api.nvim_create_user_command('Ea', 'bufdo e', {})
