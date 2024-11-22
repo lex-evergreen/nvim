@@ -490,6 +490,40 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>s.', function()
         builtin.oldfiles { only_cwd = true }
       end, { desc = '[S]earch Recent Files ("." for repeat)' })
+      vim.keymap.set('n', '<leader>si', function()
+        builtin.find_files {
+          prompt_title = 'Search Git Ignored Files',
+          find_command = {
+            'rg',
+            '--files',
+            '--hidden',
+            '--no-ignore',
+            '-g',
+            '!node_modules/',
+            '-g',
+            '!*.dll',
+            '-g',
+            '!*.so',
+            '-g',
+            '!*.bin',
+            -- Add more patterns as needed
+          },
+        }
+      end, { desc = '[S]earch [I]gnored files' })
+      vim.keymap.set('n', '<leader>sc', function()
+        builtin.find_files {
+          prompt_title = 'Search Git Config Files',
+          find_command = {
+            'rg',
+            '--files',
+            '--hidden',
+            '-g',
+            '.git/**',
+            '-g',
+            '.gitignore',
+          },
+        }
+      end, { desc = '[S]earch Git [C]onfig files' })
       vim.keymap.set('n', '<leader><leader>', function()
         builtin.buffers { sort_lastused = true, sort_mru = true }
       end, { desc = '[ ] Find existing buffers' })
