@@ -984,6 +984,12 @@ require('lazy').setup({
           { name = 'nvim_lsp_signature_help' },
         },
       }
+      -- Do not include luasnip for markdown.
+      cmp.setup.filetype({ 'markdown' }, {
+        sources = cmp.config.sources {
+          { name = 'nvim_lsp' },
+        },
+      })
     end,
   },
 
