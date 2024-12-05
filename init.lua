@@ -1004,6 +1004,8 @@ require('lazy').setup({
     -- This is pretty close to what I want, but there are some nice syntax-highlighting
     -- things that I still miss about the Visual Studio 2019 vscode theme. Apparently a couple of other
     -- people do too! https://github.com/microsoft/vscode/issues/176118
+    -- Apparently the arctic.nvim theme does not have different colors for things like interfaces vs classes, so
+    -- even if semantic highlighting was enabled it wouldn't look any different. Maybe fork it and make a PR.
     'rockyzhang24/arctic.nvim',
     branch = 'v2',
     dependencies = { 'rktjmp/lush.nvim' },
