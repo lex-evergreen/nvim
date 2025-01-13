@@ -171,6 +171,9 @@ vim.g.omni_sql_no_default_maps = 1
 vim.keymap.set('n', '<leader>dq', vim.diagnostic.setloclist, { desc = 'Open [D]iagnostic [Q]uickfix list' })
 vim.keymap.set('n', '<leader>df', vim.diagnostic.open_float, { desc = 'Open [D]iagnostic [F]loat' })
 
+-- Prevent <C-z> from suspending neovim
+vim.keymap.set('n', '<C-z>', '', { noremap = true, silent = true })
+
 --- Buffer keymaps
 -- Wipe the current buffer
 vim.keymap.set('n', '<leader>bw', function()
