@@ -38,7 +38,7 @@ return {
         --[[ on_attach = function(client)
           -- This function's definition can be found at
           -- https://github.com/seblj/roslyn.nvim/wiki#semantic-tokens
-          monkey_patch_semantic_tokens(client)
+          -- monkey_patch_semantic_tokens(client)
         end, ]]
       },
       --[[ exe = {
@@ -57,5 +57,59 @@ return {
       -- a lot faster to initialize.
       filewatching = true,
     },
+  },
+  { 'Issafalcon/lsp-overloads.nvim' },
+  {
+    'cbochs/grapple.nvim',
+    dependencies = {
+      { 'nvim-tree/nvim-web-devicons', lazy = true },
+    },
+    opts = {
+      scope = 'git', -- also try out "git_branch"
+      -- icons = false, -- setting to "true" requires "nvim-web-devicons"
+      -- status = false,
+    },
+    keys = {
+      { '<leader>a', '<cmd>Grapple toggle<cr>', desc = 'Tag a file' },
+      { '<C-g>', '<cmd>Grapple toggle_tags<cr>', desc = 'Toggle tags menu' },
+
+      { '<C-1>', '<cmd>Grapple select index=1<cr>', desc = 'Select first tag' },
+      { '<C-2>', '<cmd>Grapple select index=2<cr>', desc = 'Select second tag' },
+      { '<C-3>', '<cmd>Grapple select index=3<cr>', desc = 'Select third tag' },
+      { '<C-4>', '<cmd>Grapple select index=4<cr>', desc = 'Select fourth tag' },
+      { '<C-5>', '<cmd>Grapple select index=5<cr>', desc = 'Select fifth tag' },
+
+      { '<C-S-n>', '<cmd>Grapple cycle_tags next<cr>', desc = 'Go to next tag' },
+      { '<C-S-p>', '<cmd>Grapple cycle_tags prev<cr>', desc = 'Go to previous tag' },
+    },
+  },
+  { 'towolf/vim-helm', ft = 'helm' },
+  {
+    'MeanderingProgrammer/render-markdown.nvim',
+    -- dependencies = { 'nvim-treesitter/nvim-treesitter', 'echasnovski/mini.nvim' }, -- if you use the mini.nvim suite
+    dependencies = { 'nvim-treesitter/nvim-treesitter', 'nvim-tree/nvim-web-devicons' }, -- if you prefer nvim-web-devicons
+    ---@module 'render-markdown'
+    ---@type render.md.UserConfig
+    opts = {
+      sign = { enabled = false },
+      enabled = false,
+    },
+  },
+  {
+    'CopilotC-Nvim/CopilotChat.nvim',
+    dependencies = {
+      { 'github/copilot.vim' }, -- or zbirenbaum/copilot.lua
+      { 'nvim-lua/plenary.nvim', branch = 'master' }, -- for curl, log and async functions
+    },
+    build = 'make tiktoken', -- Only on MacOS or Linux
+    opts = {
+      -- See Configuration section for options
+      model = 'gpt-4.1',
+    },
+    -- See Commands section for default commands if you want to lazy load on them
+  },
+  {
+    'Cliffback/netcoredbg-macOS-arm64.nvim',
+    dependencies = { 'mfussenegger/nvim-dap' },
   },
 }

@@ -35,6 +35,13 @@ return {
       { '<F3>', dap.step_out, desc = 'Debug: Step Out' },
       { '<leader>b', dap.toggle_breakpoint, desc = 'Debug: Toggle Breakpoint' },
       {
+        '<leader>de',
+        function()
+          dapui.eval()
+        end,
+        desc = 'Debug: Evaluate symbol',
+      },
+      {
         '<leader>B',
         function()
           dap.set_breakpoint(vim.fn.input 'Breakpoint condition: ')
@@ -64,6 +71,10 @@ return {
       ensure_installed = {
         -- Update this to ensure that you have the debuggers for the langs you want
         'delve',
+        -- Since this is registered from https://github.com/Samsung/netcoredbg and they don't have an arm64 macos build, it won't work on Apple Silicon.
+        -- https://github.com/mason-org/mason-registry/blob/beaf00d46b046f1c03883ec95b71d02cfe9c44d8/packages/netcoredbg/package.yaml#L4
+        -- Instead I'm using Cliffback/netcoredbg-macOS-arm64.nvim to install the macos version and set it up for me.
+        -- 'netcoredbg',
       },
     }
 

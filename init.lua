@@ -170,11 +170,17 @@ vim.g.omni_sql_no_default_maps = 1
 -- Diagnostic keymaps
 vim.keymap.set('n', '<leader>dq', vim.diagnostic.setloclist, { desc = 'Open [D]iagnostic [Q]uickfix list' })
 vim.keymap.set('n', '<leader>df', vim.diagnostic.open_float, { desc = 'Open [D]iagnostic [F]loat' })
+-- Update diagnostics while in insert mode
+vim.diagnostic.config { update_in_insert = true }
 
 -- Prevent <C-z> from suspending neovim
 vim.keymap.set('n', '<C-z>', '', { noremap = true, silent = true })
 
---- Buffer keymaps
+-- Select all text in the current buffer
+vim.keymap.set('n', '<C-a>', 'ggVG', { noremap = true, silent = true })
+
+--- Buffer keymaps ---
+
 -- Wipe the current buffer
 vim.keymap.set('n', '<leader>bw', function()
   vim.cmd 'bw'
@@ -189,18 +195,57 @@ vim.keymap.set('n', '<leader>byf', function()
 end, { desc = '[b]uffer [y]ank [f]ilename' })
 -- Yank buffer path
 vim.keymap.set('n', '<leader>byp', function()
-  vim.fn.setreg('+', vim.fn.expand '%:p')
+  vim.fn.setreg('+', './' .. vim.fn.expand '%:.')
 end, { desc = '[b]uffer [y]ank [p]ath' })
 
+-- Move lines up and down
+vim.keymap.set('n', '<A-j>', ':m .+1<CR>==') -- move line up(n)
+vim.keymap.set('n', '<A-k>', ':m .-2<CR>==') -- move line down(n)
+vim.keymap.set('v', '<A-j>', ":m '>+1<CR>gv=gv") -- move line up(v)
+vim.keymap.set('v', '<A-k>', ":m '<-2<CR>gv=gv") -- move line down(v)
+
 -- Extend buffer-related commands with "a"-suffix equivalents (like :w and :wa).
-vim.api.nvim_create_user_command('Ea', 'bufdo e', {})
-vim.api.nvim_create_user_command('Bwa', 'bufdo bw', {})
+local function edit_all_buffers()
+  local current_buf = vim.api.nvim_get_current_buf()
+  for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+    if vim.fn.buflisted(buf) == 1 then
+      local fname = vim.api.nvim_buf_get_name(buf)
+      if fname ~= '' then
+        local modified = vim.api.nvim_get_option_value('modified', { buf = buf })
+        if not modified then
+          vim.api.nvim_buf_call(buf, function()
+            vim.cmd 'edit'
+          end)
+        end
+      end
+    end
+  end
+  vim.cmd('buffer ' .. current_buf)
+end
+vim.api.nvim_create_user_command('Ea', edit_all_buffers, { desc = '[E]dit [a]ll buffers' })
+local function wipe_non_current_clean_buffers()
+  local current_buf = vim.api.nvim_get_current_buf()
+  for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+    -- Only consider listed buffers that aren't the current one
+    if buf ~= current_buf and vim.fn.buflisted(buf) == 1 then
+      local is_modified = vim.api.nvim_get_option_value('modified', { buf = buf })
+      if not is_modified then
+        vim.cmd('bwipeout ' .. buf)
+      end
+    end
+  end
+end
+vim.api.nvim_create_user_command('Bwa', wipe_non_current_clean_buffers, { desc = '[B]uffer [w]ipe [a]ll' })
+-- Combine :w and :e
+vim.api.nvim_create_user_command('We', 'w | e', {})
 -- Map capital equivalents of common commands to prevent no-ops or unintended completion
 -- when accidentally capitalizing.
 vim.api.nvim_create_user_command('Q', 'q', {})
 vim.api.nvim_create_user_command('W', 'w', {})
 vim.api.nvim_create_user_command('Qa', 'qa', {})
 vim.api.nvim_create_user_command('Wa', 'wa', {})
+
+--- End Buffer Keymaps ---
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
@@ -224,6 +269,25 @@ vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left wind
 vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
+
+-- Diff the buffer and the file on disk
+vim.cmd [[
+    command DiffOrig vert new | setlocal buftype=nofile bufhidden=wipe | read ++edit # | 0d_
+       \ | diffthis | wincmd p | diffthis
+]]
+vim.keymap.set('n', '<leader>do', '<cmd>DiffOrig<CR>', { desc = '[d]iff with [o]riginal (compare buffer with saved file)' })
+
+--- Plugin Keymaps ---
+
+-- Toggle spellcheck
+vim.keymap.set('n', '<leader>ts', ':setlocal spell! spelllang=en_us<CR>', { desc = '[t]oggle [s]pellcheck' })
+-- Toggle markdown rendering via render-markdown.nvim
+vim.keymap.set('n', '<leader>tm', ':RenderMarkdown toggle<CR>', { desc = '[t]oggle [m]arkdown rendering' })
+
+-- Toggle CopilotChat
+vim.keymap.set({ 'n', 'v' }, '<leader>co', ':CopilotChat<CR>', { desc = 'toggle [co]pilot chat' })
+
+--- End Plugin Keymaps ---
 
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
@@ -281,6 +345,7 @@ require('lazy').setup({
   { -- Adds git related signs to the gutter, as well as utilities for managing changes
     'lewis6991/gitsigns.nvim',
     opts = {
+      sign_priority = 20,
       signs = {
         add = { text = '+' },
         change = { text = '~' },
@@ -303,7 +368,7 @@ require('lazy').setup({
           else
             gitsigns.nav_hunk 'next'
           end
-        end)
+        end, { desc = 'Next change' })
 
         map('n', '[c', function()
           if vim.wo.diff then
@@ -311,7 +376,7 @@ require('lazy').setup({
           else
             gitsigns.nav_hunk 'prev'
           end
-        end)
+        end, { desc = 'Previous change' })
         -- Actions
         map('n', '<leader>hs', gitsigns.stage_hunk, { desc = '[h]unk [s]tage' })
         map('n', '<leader>hr', gitsigns.reset_hunk, { desc = '[h]unk [r]eset' })
@@ -518,6 +583,9 @@ require('lazy').setup({
       end, { desc = '[S]earch [F]iles' })
       vim.keymap.set('n', '<leader>ss', builtin.builtin, { desc = '[S]earch [S]elect Telescope' })
       vim.keymap.set('n', '<leader>sw', builtin.grep_string, { desc = '[S]earch current [W]ord' })
+      vim.keymap.set('n', '<leader>sW', function()
+        builtin.grep_string { search = vim.fn.expand '<cWORD>' }
+      end, { desc = '[S]earch current [W]ORD' })
       vim.keymap.set('n', '<leader>sg', builtin.live_grep, { desc = '[S]earch by [G]rep' })
       vim.keymap.set('n', '<leader>sd', builtin.diagnostics, { desc = '[S]earch [D]iagnostics' })
       vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = '[S]earch [R]esume' })
@@ -597,6 +665,8 @@ require('lazy').setup({
       library = {
         -- Load luvit types when the `vim.uv` word is found
         { path = 'luvit-meta/library', words = { 'vim%.uv' } },
+        -- Load types for nvim-dap-ui
+        { path = 'nvim-dap-ui', words = { 'nvim%-dap%-ui' } },
       },
     },
   },
@@ -711,6 +781,18 @@ require('lazy').setup({
           --  For example, in C this would take you to the header.
           map('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
 
+          -- Displays and hides codelens for the current buffer
+          local toggle_codelens = function()
+            if vim.b.codelens_enabled then
+              vim.lsp.codelens.clear()
+              vim.b.codelens_enabled = false
+            else
+              vim.lsp.codelens.refresh()
+              vim.b.codelens_enabled = true
+            end
+          end
+          map('<leader>tcl', toggle_codelens, '[t]oggle [c]ode [l]ens')
+
           -- The following two autocommands are used to highlight references of the
           -- word under your cursor when your cursor rests there for a little while.
           --    See `:help CursorHold` for information about when this is executed
@@ -749,6 +831,25 @@ require('lazy').setup({
               vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = event.buf })
             end, '[T]oggle Inlay [H]ints')
           end
+
+          -- Configure the Issafalcon/lsp-overloads.nvim plugin if the LSP server has
+          -- the signatureHelpProvider capability.
+          if client and client.server_capabilities.signatureHelpProvider then
+            require('lsp-overloads').setup(client, {
+              keymaps = {
+                next_signature = '<M-j>',
+                previous_signature = '<M-k>',
+                next_parameter = '<M-l>',
+                previous_parameter = '<M-h>',
+                close_signature = '<M-s>',
+              },
+              display_automatically = false,
+            })
+            vim.keymap.set('n', '<M-s>', function()
+              vim.cmd 'LspOverloadsSignature'
+              vim.cmd 'stopinsert'
+            end, { noremap = true, silent = true, buffer = event.buf })
+          end
         end,
       })
 
@@ -783,13 +884,40 @@ require('lazy').setup({
         ts_ls = {},
         ['eslint-lsp'] = {},
         ['json-lsp'] = {},
-        --
-        --[[ omnisharp = {
+        ['html-lsp'] = {},
+        ['lemminx'] = {},
+        pylsp = {},
+        yamlls = {
+          --[[ settings = {
+            yaml = {
+              schemas = {
+                kubernetes = '*.yaml',
+                ['http://json.schemastore.org/chart'] = 'Chart.{yml,yaml}',
+              },
+            },
+          }, ]]
+        },
+        ['helm-ls'] = {
           settings = {
-
-          }
-        } ]]
-
+            ['helm-ls'] = {
+              yamlls = {
+                path = 'yaml-language-server',
+                config = {
+                  schemaStore = {
+                    -- Even though we enable the schema store, there are plenty of
+                    -- CRDs whose schemas are not yet available there.
+                    enable = true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        -- Currently there's a small bug with telescope LSP references and angularls.
+        -- See https://github.com/nvim-telescope/telescope.nvim/issues/3177
+        -- This only works when the strictTemplates angular compiler option is set to true.
+        -- See https://angular.dev/tools/language-service#configuring-compiler-options-for-the-angular-language-service
+        -- angularls = {},
         lua_ls = {
           -- cmd = {...},
           -- filetypes = { ...},
@@ -840,6 +968,21 @@ require('lazy').setup({
           end,
         },
       }
+
+      -- See plugins/init.lua and plugins/debug.lua
+      require('netcoredbg-macOS-arm64').setup(require 'dap')
+      -- This removes the configuration set here:
+      -- https://github.com/Cliffback/netcoredbg-macOS-arm64.nvim/blob/ff24d005ea74a7da024631eded2f602638a854c7/lua/netcoredbg-macOS-arm64/init.lua#L61-L79
+      -- So that :DapContinue automatically uses the configuration found in {cwd}/.vscode/config.json
+      -- See :h dap-launch.json for more details.
+      table.remove(require('dap').configurations.cs, 1)
+      -- It's possible to use the vscode dotnet debugger instead of netcoredbg for pretty printing, but it's complicated:
+      -- https://github.com/mfussenegger/nvim-dap/discussions/869#discussioncomment-8121995
+      -- require('dap').adapters.coreclr = {
+      --   type = 'executable',
+      --   command = '/Users/lex/.vscode/extensions/ms-dotnettools.csharp-2.63.32-darwin-arm64/.debugger/arm64/vsdbg',
+      --   args = { '--interpreter=vscode' },
+      -- }
     end,
   },
 
@@ -1015,7 +1158,6 @@ require('lazy').setup({
           { name = 'nvim_lsp' },
           { name = 'luasnip' },
           { name = 'path' },
-          { name = 'nvim_lsp_signature_help' },
         },
       }
       -- Do not include luasnip for markdown.
@@ -1077,6 +1219,15 @@ require('lazy').setup({
       -- - sr)'  - [S]urround [R]eplace [)] [']
       require('mini.surround').setup()
 
+      -- Change mini.bracketed D diagnostic jumps to only select errors
+      local severity_error = vim.diagnostic.severity.ERROR
+      vim.keymap.set('n', '[D', function()
+        require('mini.bracketed').diagnostic('backward', { severity = severity_error })
+      end, { noremap = true, silent = true })
+      vim.keymap.set('n', ']D', function()
+        require('mini.bracketed').diagnostic('forward', { severity = severity_error })
+      end, { noremap = true, silent = true })
+
       -- Simple and easy statusline.
       --  You could remove this setup call if you don't like it,
       --  and try some other statusline plugin
@@ -1131,7 +1282,7 @@ require('lazy').setup({
   --  Here are some example plugins that I've included in the Kickstart repository.
   --  Uncomment any of the lines below to enable them (you will need to restart nvim).
   --
-  -- require 'kickstart.plugins.debug',
+  require 'kickstart.plugins.debug',
   -- require 'kickstart.plugins.indent_line',
   -- require 'kickstart.plugins.lint',
   require 'kickstart.plugins.autopairs',
@@ -1165,6 +1316,9 @@ require('lazy').setup({
     },
   },
 })
+
+-- Disable GH copilot by default.
+vim.cmd ':Copilot disable'
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
