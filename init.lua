@@ -167,6 +167,10 @@ vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 -- Disable omni sql default keymaps
 vim.g.omni_sql_no_default_maps = 1
 
+-- Set editorconfig to false by default to prevent :w from formatting.
+-- It's temporarily enabled when formatting a buffer using <leader>f.
+vim.g.editorconfig = false
+
 -- Diagnostic keymaps
 vim.keymap.set('n', '<leader>dq', vim.diagnostic.setloclist, { desc = 'Open [D]iagnostic [Q]uickfix list' })
 vim.keymap.set('n', '<leader>df', vim.diagnostic.open_float, { desc = 'Open [D]iagnostic [F]loat' })
@@ -997,6 +1001,22 @@ require('lazy').setup({
       {
         '<leader>f',
         function()
+          -- apply .editorconfig
+          local ec = require 'editorconfig'
+          local bufnr = vim.api.nvim_get_current_buf()
+          ec.config(bufnr)
+          vim.api.nvim_exec2(
+            [[
+              silent! undojoin
+              doautocmd BufWritePre <buffer>
+            ]],
+            { output = false }
+          )
+          -- clear the write autocmd so future :w is a plain save
+          vim.api.nvim_clear_autocmds { group = 'editorconfig', buffer = bufnr }
+          vim.b[bufnr].editorconfig = nil
+
+          -- Apply conform
           require('conform').format { async = true, lsp_format = 'fallback' }
         end,
         mode = '',
