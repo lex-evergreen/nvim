@@ -643,14 +643,22 @@ require('lazy').setup({
         })
       end, { desc = '[/] Fuzzily search in current buffer' })
 
-      -- It's also possible to pass additional configuration options.
-      --  See `:help telescope.builtin.live_grep()` for information about particular keys
       vim.keymap.set('n', '<leader>s/', function()
-        builtin.live_grep {
-          grep_open_files = true,
-          prompt_title = 'Live Grep in Open Files',
-        }
-      end, { desc = '[S]earch [/] in Open Files' })
+        vim.ui.input({ prompt = 'Directories to exclude (comma-separated): ' }, function(input)
+          if input then
+            local globs = {}
+            for dir in string.gmatch(input, '([^,]+)') do
+              dir = vim.trim(dir)
+              table.insert(globs, '--glob=!**/' .. dir .. '/*')
+            end
+            builtin.live_grep {
+              additional_args = function()
+                return globs
+              end,
+            }
+          end
+        end)
+      end, { desc = '[S]earch by grep with directory exclusions' })
 
       -- Shortcut for searching your Neovim configuration files
       vim.keymap.set('n', '<leader>sn', function()
@@ -1052,7 +1060,8 @@ require('lazy').setup({
       -- end,
       formatters_by_ft = {
         lua = { 'stylua' },
-        cs = { lsp_format = 'prefer' },
+        -- Change to lsp_format = 'prefer' for using the LSP (roslyn) formatter instead.
+        cs = { 'csharpier' },
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
         --
