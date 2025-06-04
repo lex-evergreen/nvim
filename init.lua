@@ -181,7 +181,7 @@ vim.diagnostic.config { update_in_insert = true }
 vim.keymap.set('n', '<C-z>', '', { noremap = true, silent = true })
 
 -- Select all text in the current buffer
-vim.keymap.set('n', '<C-a>', 'ggVG', { noremap = true, silent = true })
+vim.keymap.set('n', '<C-S-a>', 'ggVG', { noremap = true, silent = true })
 
 --- Buffer keymaps ---
 
@@ -580,7 +580,7 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sf', function()
         local is_git = vim.fn.systemlist('git rev-parse --is-inside-work-tree')[1] == 'true'
         if is_git then
-          builtin.git_files()
+          builtin.git_files { show_untracked = true }
         else
           builtin.find_files()
         end
@@ -1033,13 +1033,12 @@ require('lazy').setup({
     },
     opts = {
       notify_on_error = false,
-      -- -- For some reason, even disabled filetypes format on save sometimes (e.g., cs).
       -- -- I don't like this, so I'm disabling the whole thing for now.
       -- format_on_save = function(bufnr)
       --   -- Disable "format_on_save lsp_fallback" for languages that don't
       --   -- have a well standardized coding style. You can add additional
       --   -- languages here or re-enable it for the disabled ones.
-      --   local disable_filetypes = { c = true, cpp = true, cs = true, lua = true, ts = true, html = true }
+      --   local disable_filetypes = { cs = true, lua = true, ts = true, html = true, python = true }
       --   local lsp_format_opt
       --   if disable_filetypes[vim.bo[bufnr].filetype] then
       --     lsp_format_opt = 'never'
