@@ -175,7 +175,7 @@ vim.g.editorconfig = false
 vim.keymap.set('n', '<leader>dq', vim.diagnostic.setloclist, { desc = 'Open [D]iagnostic [Q]uickfix list' })
 vim.keymap.set('n', '<leader>df', vim.diagnostic.open_float, { desc = 'Open [D]iagnostic [F]loat' })
 -- Update diagnostics while in insert mode
-vim.diagnostic.config { update_in_insert = true }
+vim.diagnostic.config { update_in_insert = true, virtual_text = true }
 
 -- Prevent <C-z> from suspending neovim
 vim.keymap.set('n', '<C-z>', '', { noremap = true, silent = true })
@@ -799,7 +799,7 @@ require('lazy').setup({
               vim.lsp.codelens.clear()
               vim.b.codelens_enabled = false
             else
-              vim.lsp.codelens.refresh()
+              vim.lsp.codelens.refresh() { bufnr = event.buf }
               vim.b.codelens_enabled = true
             end
           end
@@ -1021,7 +1021,7 @@ require('lazy').setup({
             { output = false }
           )
           -- clear the write autocmd so future :w is a plain save
-          vim.api.nvim_clear_autocmds { group = 'editorconfig', buffer = bufnr }
+          vim.api.nvim_clear_autocmds { group = 'nvim.editorconfig', buffer = bufnr }
           vim.b[bufnr].editorconfig = nil
 
           -- Apply conform
