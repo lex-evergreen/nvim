@@ -288,9 +288,6 @@ vim.keymap.set('n', '<leader>ts', ':setlocal spell! spelllang=en_us<CR>', { desc
 -- Toggle markdown rendering via render-markdown.nvim
 vim.keymap.set('n', '<leader>tm', ':RenderMarkdown toggle<CR>', { desc = '[t]oggle [m]arkdown rendering' })
 
--- Toggle CopilotChat
-vim.keymap.set({ 'n', 'v' }, '<leader>co', ':CopilotChat<CR>', { desc = 'toggle [co]pilot chat' })
-
 --- End Plugin Keymaps ---
 
 -- [[ Basic Autocommands ]]
@@ -981,20 +978,6 @@ require('lazy').setup({
         },
       }
 
-      -- See plugins/init.lua and plugins/debug.lua
-      require('netcoredbg-macOS-arm64').setup(require 'dap')
-      -- This removes the configuration set here:
-      -- https://github.com/Cliffback/netcoredbg-macOS-arm64.nvim/blob/ff24d005ea74a7da024631eded2f602638a854c7/lua/netcoredbg-macOS-arm64/init.lua#L61-L79
-      -- So that :DapContinue automatically uses the configuration found in {cwd}/.vscode/config.json
-      -- See :h dap-launch.json for more details.
-      table.remove(require('dap').configurations.cs, 1)
-      -- It's possible to use the vscode dotnet debugger instead of netcoredbg for pretty printing, but it's complicated:
-      -- https://github.com/mfussenegger/nvim-dap/discussions/869#discussioncomment-8121995
-      -- require('dap').adapters.coreclr = {
-      --   type = 'executable',
-      --   command = '/Users/lex/.vscode/extensions/ms-dotnettools.csharp-2.63.32-darwin-arm64/.debugger/arm64/vsdbg',
-      --   args = { '--interpreter=vscode' },
-      -- }
     end,
   },
 
@@ -1344,9 +1327,6 @@ require('lazy').setup({
     },
   },
 })
-
--- Disable GH copilot by default.
-vim.cmd ':Copilot disable'
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
