@@ -1050,6 +1050,13 @@ require('lazy').setup({
         -- You can use 'stop_after_first' to run the first available formatter from the list
         -- javascript = { "prettierd", "prettier", stop_after_first = true },
       },
+      formatters = {
+        csharpier = {
+          command = vim.fn.stdpath 'data' .. '/mason/bin/dotnet-csharpier',
+          args = { '--write-stdout' },
+          stdin = true,
+        },
+      },
     },
   },
 
