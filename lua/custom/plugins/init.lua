@@ -2,6 +2,36 @@
 --  I promise not to create any merge conflicts in this directory :)
 --
 -- See the kickstart.nvim README for more information
+
+local function commit_blame_line_router(lk)
+  -- Run git blame for the current line
+  local cmd = {
+    'git',
+    'blame',
+    '-L',
+    string.format('%d,%d', lk.lstart, lk.lstart),
+    '--porcelain',
+    lk.file,
+  }
+
+  -- Check if .git-blame-ignore-revs exists and use it
+  local ignore_file = vim.fn.findfile('.git-blame-ignore-revs', '.;')
+  if ignore_file ~= '' then
+    table.insert(cmd, 5, '--ignore-revs-file')
+    table.insert(cmd, 6, ignore_file)
+  end
+
+  local output = vim.fn.system(cmd)
+  -- Extract commit SHA from first line of blame output
+  local blame_rev = output:match '^(%w+)'
+  if not blame_rev or blame_rev == '0000000000000000000000000000000000000000' then
+    error 'Failed to get blame commit'
+  end
+  local repo_name = lk.repo:match '^(.*)%.git$' or lk.repo
+  -- Build URL using the blamed commit
+  return string.format('https://github.com/%s/%s/commit/%s', lk.org, repo_name, blame_rev)
+end
+
 return {
   -- A nice way to interact with git.
   'tpope/vim-fugitive',
@@ -9,10 +39,18 @@ return {
   {
     'linrongbin16/gitlinker.nvim',
     cmd = 'GitLink',
-    opts = {},
+    opts = {
+      router = {
+        commit = {
+          ['^github%.com'] = commit_blame_line_router,
+        },
+      },
+    },
     keys = {
-      { '<leader>gy', '<cmd>GitLink<cr>', mode = { 'n', 'v' }, desc = 'Yank git link' },
-      { '<leader>gY', '<cmd>GitLink!<cr>', mode = { 'n', 'v' }, desc = 'Open git link' },
+      { '<leader>gl', '<cmd>GitLink<cr>', mode = { 'n', 'v' }, desc = 'Yank git link' },
+      { '<leader>gL', '<cmd>GitLink!<cr>', mode = { 'n', 'v' }, desc = 'Open git link' },
+      { '<leader>gc', '<cmd>GitLink commit<cr>', mode = { 'n', 'v' }, desc = 'Yank git commit' },
+      { '<leader>gC', '<cmd>GitLink! commit<cr>', mode = { 'n', 'v' }, desc = 'Open git commit' },
     },
   },
   -- An HTTP client.
