@@ -1291,6 +1291,36 @@ require('lazy').setup({
     --    - Show your current context: https://github.com/nvim-treesitter/nvim-treesitter-context
     --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
   },
+  {
+    'nvim-treesitter/nvim-treesitter-textobjects',
+    branch = 'main',
+    dependencies = { 'nvim-treesitter/nvim-treesitter' },
+
+    opts = { move = { set_jumps = true } },
+    config = function(_, opts)
+      require('nvim-treesitter-textobjects').setup(opts)
+    end,
+
+    -- lazy.nvim will set these up and can lazy-load on first use
+    keys = function()
+      local function mv(method, query, group)
+        return function()
+          require('nvim-treesitter-textobjects.move')[method](query, group or 'textobjects')
+        end
+      end
+
+      return {
+        { ']m', mv('goto_next_start', '@function.outer'), mode = { 'n', 'x', 'o' }, desc = 'Next function start' },
+        { ']M', mv('goto_next_end', '@function.outer'), mode = { 'n', 'x', 'o' }, desc = 'Next function end' },
+        { '[m', mv('goto_previous_start', '@function.outer'), mode = { 'n', 'x', 'o' }, desc = 'Prev function start' },
+        { '[M', mv('goto_previous_end', '@function.outer'), mode = { 'n', 'x', 'o' }, desc = 'Prev function end' },
+        { ']]', mv('goto_next_start', '@class.outer'), mode = { 'n', 'x', 'o' }, desc = 'Next class start' },
+        { '][', mv('goto_next_end', '@class.outer'), mode = { 'n', 'x', 'o' }, desc = 'Next class end' },
+        { '[[', mv('goto_previous_start', '@class.outer'), mode = { 'n', 'x', 'o' }, desc = 'Prev class start' },
+        { '[]', mv('goto_previous_end', '@class.outer'), mode = { 'n', 'x', 'o' }, desc = 'Prev class end' },
+      }
+    end,
+  },
 
   -- The following two comments only work if you have downloaded the kickstart repo, not just copy pasted the
   -- init.lua. If you want these files, they are in the repository, so you can just download them and
